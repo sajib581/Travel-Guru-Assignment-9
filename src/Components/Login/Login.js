@@ -3,13 +3,10 @@ import './Login.css'
 import { makeStyles } from '@material-ui/core/styles';
 import { TextField } from '@material-ui/core';
 import { SelectContext } from '../../App';
-import * as firebase from "firebase/app";
-import "firebase/auth";
-import firebaseConfig from './firebase.config';
 
 import { Link, NavLink, Redirect, useHistory, useLocation } from 'react-router-dom';
 import Headers from '../Header/Headers';
-import { initializeFirebaseApp } from './LoginManager';
+import { createUserHandeler, signInHandeler, FbSignInHandeler, googleSignInHandeler, initializeFirebaseApp, updateUserNameHandeler, verifyEmailHandeler, forgetPasswordHandeler } from './LoginManager';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,9 +17,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 const Login = () => {
-    if(firebase.apps.length === 0){
-        firebase.initializeApp(firebaseConfig);
-    }
+    initializeFirebaseApp()
     let history = useHistory();
     let location = useLocation();
     let { from } = location.state || { from: { pathname: "/" } };
@@ -42,79 +37,8 @@ const Login = () => {
         success : "" ,
         error : ""
     })
-
-    const submitHandeler =(e) => {
-        if(newUser && user.email && user.password){
-            firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
-            .then(res =>{
-                const newUserInfo = {...user}
-                newUserInfo.error = ''
-                newUserInfo.success = true  
-                setUser(newUserInfo)
-                updateUserName(user.name)
-                setLoggedInUser(newUserInfo)
-                verifyEmail()
-                history.replace(from)
-                
-            })
-            .catch(error=> {
-                const errorMessage = error.message;
-                const newUserinfo = {...user}
-                newUserinfo.error = errorMessage
-                setUser(newUserinfo)
-              });
-        }
-        if(!newUser && user.email && user.password){
-            firebase.auth().signInWithEmailAndPassword(user.email, user.password)
-            .then(res =>{
-                const newUserInfo = {...user};
-                newUserInfo.error = ''
-                newUserInfo.success = true 
-                setUser(newUserInfo)
-                setLoggedInUser(newUserInfo)
-                history.replace(from)
-            })
-            .catch( error => {
-                var errorMessage = error.message;
-                const newUserInfo = {...user}
-                newUserInfo.error = errorMessage
-                newUserInfo.success = false
-                setUser(newUserInfo)
-                console.log(errorMessage);
-              });
-        }
-        if(!newUser && user.email && forgatePassword){
-            resetPassword(user.email)
-        }
-        e.preventDefault() ;
-    }
     const [newUser, setNewUser] = useState(true)
-    
-    const googleSignIn = () => {
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(googleProvider)
-        .then(res =>{
-            const user = res.user;            
-            const {email,displayName,photoURL} = user
-            const signedInUser = {
-                isLoggedIn : true,
-                name : displayName ,
-                email : email ,
-                photo : photoURL ,
-                success:true
-              } 
-                setUser(signedInUser)
-                setLoggedInUser(signedInUser)
-                history.replace(from)
-        })
-        .catch(error =>{
-            var errorMessage = error.message;
-            console.log(errorMessage);
-        })
-    }
-    const userHandeler = () => {
-        setNewUser(!newUser)
-    }
+
     const blurHandeler = (e) => {
         let isFieldValid = true 
         let tempPassword = ''
@@ -136,59 +60,68 @@ const Login = () => {
             setUser(newUserInfo)
         }
     }
+
+    const submitHandeler =(e) => {
+        if(newUser && user.email && user.password){
+            createUserHandeler(user.email, user.password, user.name)
+            .then(res =>{
+                verifyEmail()
+                updateUserName(user.name)
+                setUser(res)
+                setLoggedInUser(res)
+                history.replace(from)
+            })
+        }
+        if(!newUser && user.email && user.password){
+            signInHandeler(user.email, user.password)
+            .then(res => {
+                setUser(res)
+                setLoggedInUser(res)
+                history.replace(from)
+            })
+        }
+        if(!newUser && user.email && forgatePassword){
+            resetPassword(user.email)
+        }
+         e.preventDefault() ;
+        // console.log(user.name);
+        // console.log(user.email);
+        // console.log(user);
+    }
+    
+    
+    const googleSignIn = () => {
+        googleSignInHandeler()
+        .then(res =>{
+            setUser(res)
+            setLoggedInUser(res)
+            history.replace(from)
+        })
+    }
+    const signUpLoginToggeler = () => {
+        setNewUser(!newUser)
+    }
+    
     const updateUserName = (name) => {
-        const user = firebase.auth().currentUser;
-        user.updateProfile({
-            displayName: name        
-        })
-        .then(res => {
-            console.log('Name update successfully');
-        })
-        .catch(error=> {
-            console.log(error);
-        });
+        updateUserNameHandeler(name)
+
     }
     const fbSignIn = () => {
-        const fbProvider = new firebase.auth.FacebookAuthProvider();
-
-        firebase.auth().signInWithPopup(fbProvider).then(res => { 
-            const user = res.user;            
-            const {email,displayName,photoURL} = user
-            const signedInUser = {
-                isLoggedIn : true,
-                name : displayName ,
-                email : email ,
-                photo : photoURL ,
-                success:true
-              } 
-                setUser(signedInUser)
-                setLoggedInUser(signedInUser)
-                history.replace(from)
-          }).catch(function(error) {
-            var errorMessage = error.message;
-            console.log(errorMessage);
-          });
+        FbSignInHandeler()
+        .then(res =>{
+            setUser(res)
+            setLoggedInUser(res)
+            history.replace(from)
+        })
     }
     const verifyEmail = () => {
-        var user = firebase.auth().currentUser;
-        user.sendEmailVerification()
-        .then( res =>{
-        })
-        .catch(error=> {
-            console.log(error);
-        });
+        verifyEmailHandeler()
     }
     const resetPassword = (email) => {
-        var auth = firebase.auth();    
-        auth.sendPasswordResetEmail(email)
-        .then( res=>{
-            const newUser = {...user}
-            user.success = "Please Check Your Email"
-            user.error = "";
-        setUser(newUser)
-        }).catch(error => {
-            console.log(error);
-        });
+        forgetPasswordHandeler()
+        .then(res =>{
+            setUser(res)
+        })
     }
     return (
         <div>
@@ -220,8 +153,8 @@ const Login = () => {
                         }
                         
                         {
-                            newUser?<p>Already have an account? <NavLink onClick={userHandeler} to="/login"> SignIn</NavLink></p>
-                            : <p>Create an account? <NavLink onClick={userHandeler} to="/login"> SignUp</NavLink></p>
+                            newUser?<p>Already have an account? <NavLink onClick={signUpLoginToggeler} to="/login"> SignIn</NavLink></p>
+                            : <p>Create an account? <NavLink onClick={signUpLoginToggeler} to="/login"> SignUp</NavLink></p>
                         }
                     </form>                    
             </div>
