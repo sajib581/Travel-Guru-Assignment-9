@@ -1,0 +1,32 @@
+.inputs{
+    border: 1px solid gray;
+    max-height: 470px;
+    width: 330px;
+    padding : 10px 20px ;
+}
+input{
+    border-bottom: 1px solid black;
+    margin-bottom: 5px;
+}
+.button{
+    border: none;
+    padding:5px 0 ;
+}
+.forms{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.google,.facebook{
+    border: 1px solid black;
+    margin-bottom: 5px;
+    border-radius:40px ;
+    padding: 5px 0px ;
+    cursor: pointer;
+}
+.icon img{
+    width:30px ;
+    padding: 0px;
+}

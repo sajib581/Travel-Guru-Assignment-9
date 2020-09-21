@@ -1,0 +1,17 @@
+
+.search{
+    width: 350px;
+}
+.logos{
+    width: 100px;
+    /* filter: brightness(0) invert(1); */
+}
+.login{
+    background-color: rgb(240, 192, 35);
+    border-radius: 5px;
+    color: black !important;    
+    /* padding-left: 20px !important;
+    padding-right: 20px !important;
+    padding-top: 10px !important; */
+    padding:10px 20px 0px 20px 
+}

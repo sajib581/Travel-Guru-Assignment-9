@@ -1,0 +1,53 @@
+.choice{
+    height: 300px;
+    border-radius: 10px;
+    width:200px
+}
+.catagories{}
+
+.catagories img{
+    height: 300px;
+    border-radius: 10px;
+    width:200px
+}
+
+.catagories img:hover{
+    border: 2px solid yellow;
+    border-radius: 15px;
+}
+  .details{
+    height: 500px;
+    width:500px;
+    margin-left: 120px;
+    padding-right :20px;    
+  }
+
+  .carts{
+    height: 500px;
+    width:800px;
+    margin-left: 10px;
+  }
+  .homeView{
+      display: flex;
+      margin-top: 80px;
+      
+  }
+  .title{
+      color: white;
+      font-weight: bold;
+      font-size: 50px;
+  }
+  .text{
+      color: white;
+  }
+  .location-name{
+      color: white;
+  }
+  .booking{
+    background-color: rgb(240, 192, 35);
+    border-radius: 5px;
+    color: black ;  
+    border: none;
+    font-weight: bold;
+    padding:5px 20px ;
+  }

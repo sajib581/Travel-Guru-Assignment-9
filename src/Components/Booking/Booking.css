@@ -1,0 +1,36 @@
+.bookings{
+    height: 400px;
+    width:420px ;
+    margin-left: 200px;
+    background-color: white;
+    border-radius:10px;
+    padding:20px;
+}
+
+.bookings .font{
+    color: darkgray;
+    margin-bottom: 0px !important;
+}
+
+.value{
+    max-width: 100%;
+    background-color: rgb(238, 237, 237);
+    border-radius: 5px;
+    padding: 10px;
+}
+.form{
+    display: flex;
+}
+.form .value{
+    width :180px ;
+}
+.start_booking{
+    background-color:goldenrod;
+    padding:10px 100px;
+    margin-top: 40px;
+    border-radius:5px;
+    cursor: pointer;
+}
+input{
+    border: none;
+}
