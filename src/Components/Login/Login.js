@@ -11,7 +11,7 @@ import { createUserHandeler, signInHandeler, FbSignInHandeler, googleSignInHande
 const useStyles = makeStyles((theme) => ({
   root: {
     '& > *': {
-      margin: theme.spacing(1),
+      margin: theme.spacing(0),
       width: '25ch',
     },
   },
@@ -33,25 +33,47 @@ const Login = () => {
     const classes = useStyles();
     const [,,loggedInUser, setLoggedInUser] = useContext(SelectContext)
     const [forgatePassword, setForgatePassword] = useState(false)
-    const [message,setMessage] = useState({
-        success : "" ,
-        error : ""
+    const [error,setError] = useState({
+        name : "",
+        email : "" ,
+
     })
     const [newUser, setNewUser] = useState(true)
+
+    const showError = (name, message) => {
+        let newError = {...error}
+        newError[name] = message
+        setError(newError)
+    }
 
     const blurHandeler = (e) => {
         let isFieldValid = true 
         let tempPassword = ''
         if(e.target.name === 'name'){
             isFieldValid = e.target.value.length>3 
+            if (isFieldValid) {          
+                showError("name","")
+            }else{                 
+                showError("name","Name Must Be More Than 4 Letters")
+            }
         } 
         if(e.target.name === 'email'){
             isFieldValid = /\S+@\S+\.\S+/.test(e.target.value) 
+            if (isFieldValid) {          
+                showError("email","")
+            }else{
+                showError("email","Please Give Valid Email")
+            }
         }        
         if(e.target.name === 'password'){
             const passwordLength = e.target.value.length > 6
             const passwordHasNumber = /\d{1}/.test(e.target.value)
-            isFieldValid = passwordHasNumber && passwordLength        
+            isFieldValid = passwordHasNumber && passwordLength    
+            if (isFieldValid) {          
+                showError("password","")
+            }else{
+                showError("password","Password Min 6 character and a character ")
+            }    
         }
         
         if(isFieldValid){
@@ -63,30 +85,33 @@ const Login = () => {
 
     const submitHandeler =(e) => {
         if(newUser && user.email && user.password){
-            createUserHandeler(user.email, user.password, user.name)
+            createUserHandeler(user.email, user.password)
             .then(res =>{
                 verifyEmail()
                 updateUserName(user.name)
                 setUser(res)
                 setLoggedInUser(res)
                 history.replace(from)
-            })
+            })            
         }
         if(!newUser && user.email && user.password){
+            console.log('Come');
             signInHandeler(user.email, user.password)
             .then(res => {
-                setUser(res)
+                console.log('new res',res);
+                setUser(res)  
+                console.log(user);
                 setLoggedInUser(res)
+                console.log(loggedInUser);
+                console.log('Done');              
                 history.replace(from)
-            })
+            })           
         }
         if(!newUser && user.email && forgatePassword){
             resetPassword(user.email)
         }
-         e.preventDefault() ;
-        // console.log(user.name);
-        // console.log(user.email);
-        // console.log(user);
+        
+        e.preventDefault() ;        
     }
     
     
@@ -95,11 +120,14 @@ const Login = () => {
         .then(res =>{
             setUser(res)
             setLoggedInUser(res)
+            console.log(loggedInUser);
+            console.log('Done');  
             history.replace(from)
         })
     }
-    const signUpLoginToggeler = () => {
+    const signUpLoginToggeler = (e) => {
         setNewUser(!newUser)
+        e.preventDefault();
     }
     
     const updateUserName = (name) => {
@@ -118,10 +146,7 @@ const Login = () => {
         verifyEmailHandeler()
     }
     const resetPassword = (email) => {
-        forgetPasswordHandeler()
-        .then(res =>{
-            setUser(res)
-        })
+        forgetPasswordHandeler(email)        
     }
     return (
         <div>
@@ -131,37 +156,41 @@ const Login = () => {
                     <h4>{newUser?"Create an account": forgatePassword ? "Reset Password" : "SignIn"}</h4>   
                     <form className={classes.root} noValidate autoComplete="off">
                         {
-                            newUser && <TextField name="name" onBlur={blurHandeler} required id="standard-basic" label="First name" />                             
+                            newUser && <TextField name="name" onBlur={blurHandeler}  id="standard-basic" label="First name" />                             
                         }
+                        {error.name && <small style={{color:"red"}}>{ error.name}</small>}
                         {
                             newUser && <TextField name="lastName" onBlur={blurHandeler} id="standard-basic" label="Last Name" />                          
                         }
-                        <TextField name="email" required onBlur={blurHandeler} id="standard-basic" label="Username or email" />
+                        <TextField name="email"  onBlur={blurHandeler} id="standard-basic" label="Username or email" />
+                        {error.email && <small style={{color:"red"}}>{ error.email}</small>}
                         {
                             !forgatePassword && <TextField name="password" required type="password" onBlur={blurHandeler} id="standard-basic" label="Password" />
                         }
+                        {error.password && <small style={{color:"red"}}>{ error.password}</small>}
                         {
-                            newUser && <TextField name="confirmPassword" type="password" onBlur={blurHandeler} id="standard-basic" label="Confirm Password" />
-                                                       
+                            newUser && <TextField name="confirmPassword" type="password" onBlur={blurHandeler} id="standard-basic" label="Confirm Password" />                                            
                         }                                            
                         {
-                            !newUser && <Link onClick = {()=>setForgatePassword(true)}>ForgatePassword</Link>
-                        }
+                            !newUser && <Link to="/login" onClick = {()=>setForgatePassword(true)}>ForgatePassword</Link>
+                        }                    
                         {
                             newUser ? <button className="login button" onClick={submitHandeler} type="submit">Create an account</button>
                         : <button className="login button" onClick={submitHandeler} type="submit">{forgatePassword?"Send Email": "SignIn"}</button>
                         }
                         
-                        {
+                        {/* {
                             newUser?<p>Already have an account? <NavLink onClick={signUpLoginToggeler} to="/login"> SignIn</NavLink></p>
                             : <p>Create an account? <NavLink onClick={signUpLoginToggeler} to="/login"> SignUp</NavLink></p>
+                        } */}
+                        {
+                            newUser?<p>Already have an account? <small className="toggel" onClick={signUpLoginToggeler}><strong>SignIn</strong></small></p>
+                            : <p>Create an account? <small className="toggel" onClick={signUpLoginToggeler}><strong>SignUp</strong></small></p>
                         }
                     </form>                    
             </div>
-            { <p style={{color:"red"}}>{user.error}</p> }
-            { <p style={{color:"green"}}>{user.success}</p> }
-            <p><small><strong>OR</strong></small></p>
-            <div>
+            { user.error && <p style={{color:"red"}}>{user.error}</p> }
+            <div className="mt-3">
                 <div className="row facebook" onClick={fbSignIn}>
                     <div className="col-md-2 icon">
                         <img src="https://i.ibb.co/DYndMXm/fb.png" alt=""/>

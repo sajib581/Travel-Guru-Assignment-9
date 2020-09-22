@@ -21,8 +21,7 @@ export const googleSignInHandeler = () => {
                 photo : photoURL ,
                 success:true
               } 
-              return signedInUser ;
-                
+              return signedInUser ;                
         })
         .catch(error =>{
             var errorMessage = error.message;
@@ -66,51 +65,57 @@ export const verifyEmailHandeler = () => {
 
 
 
-export const createUserHandeler = (email, password,name) => {
-    return firebase.auth().createUserWithEmailAndPassword(email, password,name)
-            .then(res =>{
-                const newUserInfo = res.user
-                newUserInfo.error = ''
-                newUserInfo.success = true  
-                return newUserInfo                 
+export const createUserHandeler = (email, password) => {
+    return firebase.auth().createUserWithEmailAndPassword(email, password)
+            .then(res =>{                         
+                const {email,displayName,photoURL} = res.user;
+                const signedInUser = {
+                isLoggedIn : true,
+                name : displayName ,
+                email : email ,
+                photo : photoURL ,
+                success:true
+              } 
+              return signedInUser;              
             })
             .catch(error=> {
                 const newUserinfo = {}
                 const errorMessage = error.message;                
                 newUserinfo.error = errorMessage
-                newUserinfo.success = true
+                newUserinfo.success = false
+                console.log('Error Occured');
                 return newUserinfo                
               });
 }
 
 export const signInHandeler = (email, password) => {
-    return firebase.auth().signInWithEmailAndPassword()
-            .then(res =>{
-                const newUserInfo = res.user
-                newUserInfo.error = ''
-                newUserInfo.success = true 
-                return newUserInfo                
+    return firebase.auth().signInWithEmailAndPassword(email, password)
+            .then(res =>{     
+                const {email,displayName,photoURL} = res.user;
+                const signedInUser = {
+                isLoggedIn : true,
+                name : displayName ,
+                email : email ,
+                photo : photoURL ,
+                success:true
+              } 
+              return signedInUser;            
             })
             .catch( error => {
                 const newUserInfo = {}               
                 newUserInfo.error = error.message;
                 newUserInfo.success = false
-                return newUserInfo
+                console.log(error.message);
+                return newUserInfo;
               });}
 
 export const forgetPasswordHandeler = (email) => {
     var auth = firebase.auth();    
     auth.sendPasswordResetEmail(email)
     .then( res=>{
-        const newUser = res.user
-        newUser.success = "Please Check Your Email"
-        newUser.error = "";
-        return         
+               
     }).catch(error => {
-        const newUserInfo = {}               
-        newUserInfo.error = error.message;
-        newUserInfo.success = false
-        return newUserInfo
+        const newUserInfo = {}             
     });
 }
 

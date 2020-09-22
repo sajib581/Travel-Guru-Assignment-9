@@ -1,8 +1,13 @@
 .inputs{
     border: 1px solid gray;
-    max-height: 470px;
-    width: 330px;
+    /* min-height: 370px; */
+    height:  auto;
+    width: 310px;
     padding : 10px 20px ;
+}
+.toggel{
+    color: rgb(34, 129, 238) ;
+    cursor: pointer;
 }
 input{
     border-bottom: 1px solid black;
@@ -11,6 +16,9 @@ input{
 .button{
     border: none;
     padding:5px 0 ;
+    margin-top: 10px !important;
+    padding-bottom: 5px !important;
+    margin-bottom: 10px !important;
 }
 .forms{
     min-height: 100vh;
