@@ -16,8 +16,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-const Login = () => {
-    initializeFirebaseApp()
+const Login = () => {    
     let history = useHistory();
     let location = useLocation();
     let { from } = location.state || { from: { pathname: "/" } };
@@ -33,11 +32,7 @@ const Login = () => {
     const classes = useStyles();
     const [,,loggedInUser, setLoggedInUser] = useContext(SelectContext)
     const [forgatePassword, setForgatePassword] = useState(false)
-    const [error,setError] = useState({
-        name : "",
-        email : "" ,
-
-    })
+    const [error,setError] = useState({})
     const [newUser, setNewUser] = useState(true)
 
     const showError = (name, message) => {
@@ -74,59 +69,62 @@ const Login = () => {
             }else{
                 showError("password","Password Min 6 character and a character ")
             }    
-        }
-        
+        }        
         if(isFieldValid){
             const newUserInfo = {...user}
             newUserInfo[e.target.name] = e.target.value
             setUser(newUserInfo)
         }
     }
+    const handelResponse = (res,replace) => {
+        setUser(res)
+        setLoggedInUser(res)
+        if(replace){
+            history.replace(from)
+        }        
+    }
 
     const submitHandeler =(e) => {
         if(newUser && user.email && user.password){
             createUserHandeler(user.email, user.password)
             .then(res =>{
-                verifyEmail()
-                updateUserName(user.name)
-                setUser(res)
-                setLoggedInUser(res)
-                history.replace(from)
+                if(res.isLoggedIn){
+                    verifyEmail()
+                    updateUserName(user.name)
+                    handelResponse(res, true)
+                }else{
+                    showError("result",res.error)
+                }                
             })            
         }
-        if(!newUser && user.email && user.password){
-            console.log('Come');
+        else if(!newUser && user.email && user.password){
             signInHandeler(user.email, user.password)
             .then(res => {
-                console.log('new res',res);
-                setUser(res)  
-                console.log(user);
-                setLoggedInUser(res)
-                console.log(loggedInUser);
-                console.log('Done');              
-                history.replace(from)
+                if(res.isLoggedIn){
+                    handelResponse(res, true)
+                }else{
+                    showError("result",res.error)
+                }
             })           
         }
-        if(!newUser && user.email && forgatePassword){
+        else if(!newUser && user.email && forgatePassword){
             resetPassword(user.email)
-        }
-        
+        } 
+        else{
+            showError("result","Invalid Credential")
+        }     
         e.preventDefault() ;        
-    }
-    
+    }    
     
     const googleSignIn = () => {
         googleSignInHandeler()
         .then(res =>{
-            setUser(res)
-            setLoggedInUser(res)
-            console.log(loggedInUser);
-            console.log('Done');  
-            history.replace(from)
+            handelResponse(res, true)
         })
     }
     const signUpLoginToggeler = (e) => {
         setNewUser(!newUser)
+        setError({})
         e.preventDefault();
     }
     
@@ -137,9 +135,7 @@ const Login = () => {
     const fbSignIn = () => {
         FbSignInHandeler()
         .then(res =>{
-            setUser(res)
-            setLoggedInUser(res)
-            history.replace(from)
+            handelResponse(res, true)
         })
     }
     const verifyEmail = () => {
@@ -177,19 +173,15 @@ const Login = () => {
                         {
                             newUser ? <button className="login button" onClick={submitHandeler} type="submit">Create an account</button>
                         : <button className="login button" onClick={submitHandeler} type="submit">{forgatePassword?"Send Email": "SignIn"}</button>
-                        }
-                        
-                        {/* {
-                            newUser?<p>Already have an account? <NavLink onClick={signUpLoginToggeler} to="/login"> SignIn</NavLink></p>
-                            : <p>Create an account? <NavLink onClick={signUpLoginToggeler} to="/login"> SignUp</NavLink></p>
-                        } */}
+                        }                        
                         {
                             newUser?<p>Already have an account? <small className="toggel" onClick={signUpLoginToggeler}><strong>SignIn</strong></small></p>
                             : <p>Create an account? <small className="toggel" onClick={signUpLoginToggeler}><strong>SignUp</strong></small></p>
                         }
                     </form>                    
             </div>
-            { user.error && <p style={{color:"red"}}>{user.error}</p> }
+            {/* { user.error && <p style={{color:"red"}}>{user.error}</p> } */}
+            {error.result && <p style={{color:"red"}}>{error.result}</p> }
             <div className="mt-3">
                 <div className="row facebook" onClick={fbSignIn}>
                     <div className="col-md-2 icon">

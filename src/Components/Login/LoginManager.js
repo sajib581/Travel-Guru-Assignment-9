@@ -63,8 +63,6 @@ export const verifyEmailHandeler = () => {
         });
 }
 
-
-
 export const createUserHandeler = (email, password) => {
     return firebase.auth().createUserWithEmailAndPassword(email, password)
             .then(res =>{                         
@@ -76,6 +74,7 @@ export const createUserHandeler = (email, password) => {
                 photo : photoURL ,
                 success:true
               } 
+              
               return signedInUser;              
             })
             .catch(error=> {
@@ -105,7 +104,6 @@ export const signInHandeler = (email, password) => {
                 const newUserInfo = {}               
                 newUserInfo.error = error.message;
                 newUserInfo.success = false
-                console.log(error.message);
                 return newUserInfo;
               });}
 
@@ -115,7 +113,7 @@ export const forgetPasswordHandeler = (email) => {
     .then( res=>{
                
     }).catch(error => {
-        const newUserInfo = {}             
+
     });
 }
 

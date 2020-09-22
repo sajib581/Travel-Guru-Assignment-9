@@ -30,8 +30,8 @@ const Booking = () => {
                     <input className="value" type="date" name="" id=""/>
                 </div>
             </div>
-            <div className="start_booking">
-            <h5><span onClick={bookingHandeler}>Start Booking</span></h5>
+            <div onClick={bookingHandeler} className="start_booking">
+            <h5><span>Start Booking</span></h5>
             </div>
         </div>
     );
