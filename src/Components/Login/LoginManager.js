@@ -8,20 +8,29 @@ export const initializeFirebaseApp = () => {
     }
 }
 
+const logInInfo = (res) => {
+    const {email,displayName,photoURL} = res.user
+        return {
+            isLoggedIn : true,
+            name : displayName ,
+            email : email ,
+            photo : photoURL ,
+            success:true
+        }       
+}
+const errorInfo = (error) => {
+    const newUserInfo = {}
+    const errorMessage = error.message;                
+    newUserInfo.error = errorMessage
+    newUserInfo.success = false
+    return newUserInfo
+}
 export const googleSignInHandeler = () => {
     const googleProvider = new firebase.auth.GoogleAuthProvider();
         return firebase.auth().signInWithPopup(googleProvider)
-        .then(res =>{
-            const user = res.user;            
-            const {email,displayName,photoURL} = user
-            const signedInUser = {
-                isLoggedIn : true,
-                name : displayName ,
-                email : email ,
-                photo : photoURL ,
-                success:true
-              } 
-              return signedInUser ;                
+        .then(res =>{       
+            const signedInUser = logInInfo(res)
+            return signedInUser ;                
         })
         .catch(error =>{
             var errorMessage = error.message;
@@ -32,24 +41,13 @@ export const googleSignInHandeler = () => {
 export const FbSignInHandeler = () => {
     const fbProvider = new firebase.auth.FacebookAuthProvider();
 
-        return firebase.auth().signInWithPopup(fbProvider).then(res => { 
-            const user = res.user;            
-            const {email,displayName,photoURL} = user
-            const signedInUser = {
-                isLoggedIn : true,
-                name : displayName ,
-                email : email ,
-                photo : photoURL ,
-                success:true
-              } 
-              return signedInUser
+        return firebase.auth().signInWithPopup(fbProvider).then(res => {           
+            const signedInUser = logInInfo(res)
+            return signedInUser
                 
           }).catch(function(error) {
-            var errorMessage = error.message;
-            const user = {}
-            user.error = "Facebook Authentication failed"
-            user.success = false ;
-            return user
+            const newUserInfo = errorInfo(error)
+            return newUserInfo
           });
 }
 
@@ -66,44 +64,24 @@ export const verifyEmailHandeler = () => {
 export const createUserHandeler = (email, password) => {
     return firebase.auth().createUserWithEmailAndPassword(email, password)
             .then(res =>{                         
-                const {email,displayName,photoURL} = res.user;
-                const signedInUser = {
-                isLoggedIn : true,
-                name : displayName ,
-                email : email ,
-                photo : photoURL ,
-                success:true
-              } 
-              
-              return signedInUser;              
+                const signedInUser = logInInfo(res)              
+                return signedInUser;              
             })
             .catch(error=> {
-                const newUserinfo = {}
-                const errorMessage = error.message;                
-                newUserinfo.error = errorMessage
-                newUserinfo.success = false
+                const newUserInfo = errorInfo(error)
                 console.log('Error Occured');
-                return newUserinfo                
+                return newUserInfo                
               });
 }
 
 export const signInHandeler = (email, password) => {
     return firebase.auth().signInWithEmailAndPassword(email, password)
             .then(res =>{     
-                const {email,displayName,photoURL} = res.user;
-                const signedInUser = {
-                isLoggedIn : true,
-                name : displayName ,
-                email : email ,
-                photo : photoURL ,
-                success:true
-              } 
-              return signedInUser;            
+                const signedInUser = logInInfo(res) 
+                return signedInUser;            
             })
             .catch( error => {
-                const newUserInfo = {}               
-                newUserInfo.error = error.message;
-                newUserInfo.success = false
+                const newUserInfo = errorInfo(error)
                 return newUserInfo;
               });}
 
