@@ -89,9 +89,7 @@ export const forgetPasswordHandeler = (email) => {
     var auth = firebase.auth();    
     auth.sendPasswordResetEmail(email)
     .then( res=>{
-               
     }).catch(error => {
-
     });
 }
 

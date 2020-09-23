@@ -4,9 +4,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import { TextField } from '@material-ui/core';
 import { SelectContext } from '../../App';
 
-import { Link, NavLink, Redirect, useHistory, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import Headers from '../Header/Headers';
-import { createUserHandeler, signInHandeler, FbSignInHandeler, googleSignInHandeler, initializeFirebaseApp, updateUserNameHandeler, verifyEmailHandeler, forgetPasswordHandeler } from './LoginManager';
+import { createUserHandeler, forgetPasswordHandeler, signInHandeler, FbSignInHandeler, googleSignInHandeler, updateUserNameHandeler, verifyEmailHandeler } from './LoginManager';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,15 +35,31 @@ const Login = () => {
     const [error,setError] = useState({})
     const [newUser, setNewUser] = useState(true)
 
+    //My Functions
     const showError = (name, message) => {
         let newError = {...error}
         newError[name] = message
         setError(newError)
     }
+    const handelResponse = (res,replace) => {
+        setUser(res)
+        setLoggedInUser(res)
+        if(replace){
+            history.replace(from)
+        }        
+    }
+    const removeErrrors = ()=> {
+        setForgatePassword(true)
+        setError({}) 
+    }
+    //Firebase Functions
+    const resetPassword = (email) => {
+        forgetPasswordHandeler(email) 
+        showError("success","An email has been sent to your email. Please Check.")       
+    }
 
     const blurHandeler = (e) => {
         let isFieldValid = true 
-        let tempPassword = ''
         if(e.target.name === 'name'){
             isFieldValid = e.target.value.length>3 
             if (isFieldValid) {          
@@ -76,13 +92,6 @@ const Login = () => {
             setUser(newUserInfo)
         }
     }
-    const handelResponse = (res,replace) => {
-        setUser(res)
-        setLoggedInUser(res)
-        if(replace){
-            history.replace(from)
-        }        
-    }
 
     const submitHandeler =(e) => {
         if(newUser && user.email && user.password){
@@ -97,7 +106,7 @@ const Login = () => {
                 }                
             })            
         }
-        else if(!newUser && user.email && user.password){
+        else if(!newUser && user.email && user.password && !forgatePassword){
             signInHandeler(user.email, user.password)
             .then(res => {
                 if(res.isLoggedIn){
@@ -114,7 +123,13 @@ const Login = () => {
             showError("result","Invalid Credential")
         }     
         e.preventDefault() ;        
-    }    
+    } 
+
+    const signUpLoginToggeler = (e) => {
+        setNewUser(!newUser)
+        setError({})
+        e.preventDefault();
+    }   
     
     const googleSignIn = () => {
         googleSignInHandeler()
@@ -122,12 +137,7 @@ const Login = () => {
             handelResponse(res, true)
         })
     }
-    const signUpLoginToggeler = (e) => {
-        setNewUser(!newUser)
-        setError({})
-        e.preventDefault();
-    }
-    
+        
     const updateUserName = (name) => {
         updateUserNameHandeler(name)
 
@@ -141,9 +151,7 @@ const Login = () => {
     const verifyEmail = () => {
         verifyEmailHandeler()
     }
-    const resetPassword = (email) => {
-        forgetPasswordHandeler(email)        
-    }
+    
     return (
         <div>
             <Headers></Headers>
@@ -168,7 +176,7 @@ const Login = () => {
                             newUser && <TextField name="confirmPassword" type="password" onBlur={blurHandeler} id="standard-basic" label="Confirm Password" />                                            
                         }                                            
                         {
-                            !newUser && <Link to="/login" onClick = {()=>setForgatePassword(true)}>ForgatePassword</Link>
+                            !newUser && <Link to="/login" onClick = {removeErrrors}>ForgatePassword</Link>
                         }                    
                         {
                             newUser ? <button className="login button" onClick={submitHandeler} type="submit">Create an account</button>
@@ -180,8 +188,8 @@ const Login = () => {
                         }
                     </form>                    
             </div>
-            {/* { user.error && <p style={{color:"red"}}>{user.error}</p> } */}
             {error.result && <p style={{color:"red"}}>{error.result}</p> }
+            {error.success && <p style={{color:"green"}}>{error.success}</p> }
             <div className="mt-3">
                 <div className="row facebook" onClick={fbSignIn}>
                     <div className="col-md-2 icon">
